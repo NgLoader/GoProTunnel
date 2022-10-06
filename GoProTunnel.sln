@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPT.Network", "GPT.Network\GPT.Network.csproj", "{FEE50794-9D35-4F45-BB3E-FAFE7E12D7B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPT.Server", "GPT.Server\GPT.Server.csproj", "{012CD2CD-8265-472C-B111-1C53B21E29C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPT.Client", "GPT.Client\GPT.Client.csproj", "{C7F5D7DA-42C9-427D-BAB8-97B65CF2B6B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPT.Camera", "GPT.Camera\GPT.Camera.csproj", "{A6F5A491-36E2-4ABB-AC9D-A53F9BECB17F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FEE50794-9D35-4F45-BB3E-FAFE7E12D7B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEE50794-9D35-4F45-BB3E-FAFE7E12D7B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEE50794-9D35-4F45-BB3E-FAFE7E12D7B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEE50794-9D35-4F45-BB3E-FAFE7E12D7B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{012CD2CD-8265-472C-B111-1C53B21E29C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{012CD2CD-8265-472C-B111-1C53B21E29C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{012CD2CD-8265-472C-B111-1C53B21E29C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{012CD2CD-8265-472C-B111-1C53B21E29C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7F5D7DA-42C9-427D-BAB8-97B65CF2B6B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7F5D7DA-42C9-427D-BAB8-97B65CF2B6B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7F5D7DA-42C9-427D-BAB8-97B65CF2B6B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7F5D7DA-42C9-427D-BAB8-97B65CF2B6B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6F5A491-36E2-4ABB-AC9D-A53F9BECB17F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6F5A491-36E2-4ABB-AC9D-A53F9BECB17F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6F5A491-36E2-4ABB-AC9D-A53F9BECB17F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6F5A491-36E2-4ABB-AC9D-A53F9BECB17F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7CCB4655-3078-47C7-9C78-F419F346C1E7}
+	EndGlobalSection
+EndGlobal
