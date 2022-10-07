@@ -9,69 +9,86 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Runtime.ConstrainedExecution;
+using DotNetty.Handlers.Tls;
+using System.Collections.Concurrent;
 
 namespace GPT.Network
 {
-    internal class NetworkServer : IDisposable
+    public class NetworkServer : IDisposable
     {
+        internal readonly ConcurrentBag<NetworkHandler> networkHandlers = new();
+
         private readonly EndPoint address;
 
-        private ServerBootstrap bootstrap;
-        private MultithreadEventLoopGroup masterGroup;
-        private MultithreadEventLoopGroup slaveGroup;
+        private ServerBootstrap? bootstrap;
+        private MultithreadEventLoopGroup? masterGroup;
+        private MultithreadEventLoopGroup? slaveGroup;
 
         private volatile bool running = false;
 
-        public NetworkServer(EndPoint address, IPacketHandler packetHandler)
+        public NetworkServer(EndPoint address)
         {
             this.address = address;
 
-            this.masterGroup = new MultithreadEventLoopGroup();
-            this.slaveGroup = new MultithreadEventLoopGroup();
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => this.Dispose();
+        }
 
-            this.bootstrap = new ServerBootstrap();
-            this.bootstrap
+        public async Task<bool> Start<PacketHandler>(ActionChannelInitializer<ISocketChannel> initializer, PacketHandler packetHandler) where PacketHandler : Type
+        {
+            if (running)
+            {
+                return false;
+            }
+            running = true;
+
+            masterGroup = new MultithreadEventLoopGroup();
+            slaveGroup = new MultithreadEventLoopGroup();
+            bootstrap = new ServerBootstrap();
+            bootstrap
                 .Group(masterGroup, slaveGroup)
                 .Channel<TcpServerSocketChannel>()
                 .Option(ChannelOption.SoBacklog, 100)
                 .ChildHandler(new ActionChannelInitializer<ISocketChannel>((channel) =>
                 {
                     IChannelPipeline pipeline = channel.Pipeline;
-                    pipeline.AddLast(new PacketEncoder(), new PacketDecoder(), new NetworkHandler(packetHandler, channel));
+
+                    NetworkHandler networkHandler = new(this, packetHandler);
+                    networkHandlers.Add(networkHandler);
+
+                    pipeline.AddLast(new PacketEncoder(), new PacketDecoder(), networkHandler);
                 }));
 
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => this.Dispose();
-        }
-
-        public async Task<bool> Start()
-        {
-            if (this.running)
-            {
-                return false;
-            }
-
-            this.running = true;
-            await this.bootstrap.BindAsync(this.address);
+            await bootstrap.BindAsync(this.address);
             return true;
         }
 
         public async Task<bool> Stop()
         {
-            if (!this.running)
+            if (!running)
             {
                 return false;
             }
 
-            await this.masterGroup.ShutdownGracefullyAsync();
-            await this.slaveGroup.ShutdownGracefullyAsync();
+            if (masterGroup != null)
+            {
+                await masterGroup.ShutdownGracefullyAsync();
+            }
+            if (slaveGroup != null)
+            {
+                await slaveGroup.ShutdownGracefullyAsync();
+            }
 
-            this.running = false;
+            bootstrap = null;
+            masterGroup = null;
+            slaveGroup = null;
+
+            running = false;
             return true;
         }
 
         public async void Dispose()
         {
-            await this.Stop();
+            await Stop();
         }
     }
 }

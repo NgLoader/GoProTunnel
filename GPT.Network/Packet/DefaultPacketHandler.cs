@@ -6,19 +6,18 @@ using System.Threading.Tasks;
 
 namespace GPT.Network.Packet
 {
-    internal class DefaultPacketHandler : IPacketHandler
+    public abstract class DefaultPacketHandler : IPacketHandler
     {
-        public void handleCameraStreamFollowPacket(CameraStreamFollowPacket packet)
+        protected DefaultPacketHandler(NetworkHandler networkHandler) : base(networkHandler)
         {
-
         }
-        public void handleCameraStreamUnfollowPacket(CameraStreamUnfollowPacket packet)
-        {
 
-        }
-        public void handleCameraStreamRecivePacket(CameraStreamRecivePacket packet)
-        {
+        public abstract void HandleCameraStreamFollowPacket(CameraStreamFollowPacket packet);
 
-        }
+        public abstract void HandleCameraStreamUnfollowPacket(CameraStreamUnfollowPacket packet);
+
+        public abstract void HandleCameraStreamRecivePacket(CameraStreamRecivePacket packet);
+
+        public abstract void HandleDisconnectPacket(DisconnectPacket packet);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GPT.Network.Packet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,12 @@ namespace GPT.Network
         private static readonly Dictionary<int, Type> IdToPacket = new Dictionary<int, Type>();
         private static readonly Dictionary<Type, int> PacketToId = new Dictionary<Type, int>();
 
-        static PacketRegistry() {
+        static PacketRegistry()
+        {
+            RegisterPacket(typeof(DisconnectPacket));
+            RegisterPacket(typeof(CameraStreamFollowPacket));
+            RegisterPacket(typeof(CameraStreamUnfollowPacket));
+            RegisterPacket(typeof(CameraStreamRecivePacket));
         }
 
         private static void RegisterPacket(Type packet)

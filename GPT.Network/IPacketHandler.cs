@@ -6,7 +6,17 @@ using System.Threading.Tasks;
 
 namespace GPT.Network
 {
-    internal class IPacketHandler
+    public class IPacketHandler : IDisposable
     {
+        internal readonly NetworkHandler networkHandler;
+
+        public IPacketHandler(NetworkHandler networkHandler)
+        {
+            this.networkHandler = networkHandler;
+        }
+
+        public void Dispose()
+        {
+        }
     }
 }

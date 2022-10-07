@@ -65,5 +65,17 @@ namespace GPT.Network
             WriteVarInt(buffer, array.Length);
             buffer.WriteBytes(array);
         }
+
+        public static string ReadString(IByteBuffer buffer)
+        {
+            byte[] bytes = ReadByteArray(buffer);
+            return Encoding.UTF8.GetString(bytes);
+        }
+
+        public static void WriteString(IByteBuffer buffer, String message)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(message);
+            WriteByteArray(buffer, bytes);
+        }
     }
 }

@@ -2,32 +2,32 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace GPT.Network.Packet
 {
-    public class CameraStreamUnfollowPacket : IPacket<DefaultPacketHandler>
+    public class DisconnectPacket : IPacket<DefaultPacketHandler>
     {
-        public int? CameraId
+        public string? Reason
         { get; set; }
 
         public void Read(IByteBuffer buffer)
         {
-            CameraId = buffer.ReadInt();
+            Reason = ByteBufferUtil.ReadString(buffer);
         }
 
         public void Write(IByteBuffer buffer)
         {
-            if (CameraId != null)
+            if (Reason != null)
             {
-                buffer.WriteInt((int)CameraId);
+                ByteBufferUtil.WriteString(buffer, Reason);
             }
         }
+
         public void Handle(DefaultPacketHandler handler)
         {
-            handler.HandleCameraStreamUnfollowPacket(this);
+            handler.HandleDisconnectPacket(this);
         }
     }
 }

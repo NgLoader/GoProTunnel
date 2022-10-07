@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace GPT.Network
 {
-    internal interface IPacket<T> where T : IPacketHandler
+    public interface IPacket<PacketHandler> where PacketHandler : IPacketHandler
     {
         void Read(IByteBuffer buffer);
 
         void Write(IByteBuffer buffer);
 
-        void Handle(T handler);
+        void Handle(PacketHandler handler);
     }
 }

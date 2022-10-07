@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GPT.Network.Packet
 {
-    internal class CameraStreamFollowPacket : IPacket<DefaultPacketHandler>
+    public class CameraStreamFollowPacket : IPacket<DefaultPacketHandler>
     {
         public int? CameraId
         { get; set; }
@@ -27,7 +27,7 @@ namespace GPT.Network.Packet
         }
         public void Handle(DefaultPacketHandler handler)
         {
-            handler.handleCameraStreamFollowPacket(this);
+            handler.HandleCameraStreamFollowPacket(this);
         }
     }
 }
