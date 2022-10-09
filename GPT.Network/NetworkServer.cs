@@ -14,36 +14,21 @@ using System.Collections.Concurrent;
 
 namespace GPT.Network
 {
-    public class NetworkServer : IDisposable
+    public class NetworkServer
     {
-        internal readonly ConcurrentBag<NetworkHandler> networkHandlers = new();
+        internal readonly HashSet<NetworkHandler> networkHandlers = new();
+        internal readonly HashSet<NetworkServerInstance> networkServers = new();
 
-        private readonly EndPoint address;
-
-        private ServerBootstrap? bootstrap;
-        private MultithreadEventLoopGroup? masterGroup;
-        private MultithreadEventLoopGroup? slaveGroup;
-
-        private volatile bool running = false;
-
-        public NetworkServer(EndPoint address)
+        public NetworkServer()
         {
-            this.address = address;
-
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => this.Dispose();
+            AppDomain.CurrentDomain.ProcessExit += async (s, e) => await Stop();
         }
 
-        public async Task<bool> Start<PacketHandler>(ActionChannelInitializer<ISocketChannel> initializer, PacketHandler packetHandler) where PacketHandler : Type
+        public async Task<NetworkServerInstance> StartServer<PacketHandler>(EndPoint address, PacketHandler packetHandler) where PacketHandler : Type
         {
-            if (running)
-            {
-                return false;
-            }
-            running = true;
-
-            masterGroup = new MultithreadEventLoopGroup();
-            slaveGroup = new MultithreadEventLoopGroup();
-            bootstrap = new ServerBootstrap();
+            MultithreadEventLoopGroup masterGroup = new();
+            MultithreadEventLoopGroup slaveGroup = new();
+            ServerBootstrap bootstrap = new();
             bootstrap
                 .Group(masterGroup, slaveGroup)
                 .Channel<TcpServerSocketChannel>()
@@ -52,43 +37,64 @@ namespace GPT.Network
                 {
                     IChannelPipeline pipeline = channel.Pipeline;
 
-                    NetworkHandler networkHandler = new(this, packetHandler);
+                    NetworkHandler networkHandler = new(this, channel, packetHandler);
                     networkHandlers.Add(networkHandler);
 
-                    pipeline.AddLast(new PacketEncoder(), new PacketDecoder(), networkHandler);
+                    pipeline.AddLast("decoder", new PacketDecoder());
+                    pipeline.AddLast("encoder", new PacketEncoder());
+                    pipeline.AddLast("handler", networkHandler);
                 }));
 
-            await bootstrap.BindAsync(this.address);
-            return true;
+            await bootstrap.BindAsync(address);
+
+            NetworkServerInstance instance = new NetworkServerInstance()
+            {
+                NetworkServer = this,
+                ServerBootstrap = bootstrap,
+                MasterGroup = masterGroup,
+                SlaveGroup = slaveGroup
+            };
+            return instance;
         }
 
-        public async Task<bool> Stop()
+        public async Task<NetworkServerInstance> StartClient<PacketHandler>(EndPoint address, PacketHandler packetHandler) where PacketHandler : Type
         {
-            if (!running)
-            {
-                return false;
-            }
+            Bootstrap bootstrap = new();
+            MultithreadEventLoopGroup slaveGroup = new();
+            bootstrap
+                .Group(slaveGroup)
+                .Channel<TcpSocketChannel>()
+                .Option(ChannelOption.SoBacklog, 100)
+                .Handler(new ActionChannelInitializer<ISocketChannel>((channel) =>
+                {
+                    IChannelPipeline pipeline = channel.Pipeline;
 
-            if (masterGroup != null)
-            {
-                await masterGroup.ShutdownGracefullyAsync();
-            }
-            if (slaveGroup != null)
-            {
-                await slaveGroup.ShutdownGracefullyAsync();
-            }
+                    NetworkHandler networkHandler = new(this, channel, packetHandler);
+                    networkHandlers.Add(networkHandler);
 
-            bootstrap = null;
-            masterGroup = null;
-            slaveGroup = null;
+                    pipeline.AddLast("decoder", new PacketDecoder());
+                    pipeline.AddLast("encoder", new PacketEncoder());
+                    pipeline.AddLast("handler", networkHandler);
+                }));
 
-            running = false;
-            return true;
+            IChannel channel = await bootstrap.ConnectAsync(address);
+
+            NetworkServerInstance instance = new NetworkServerInstance()
+            {
+                NetworkServer = this,
+                ClientBootstrap = bootstrap,
+                SlaveGroup = slaveGroup,
+                ClientChannel = channel
+            };
+            return instance;
         }
 
-        public async void Dispose()
+        public async Task Stop()
         {
-            await Stop();
+            foreach (NetworkServerInstance instance in networkServers)
+            {
+                await instance.Stop();
+            }
         }
     }
 }

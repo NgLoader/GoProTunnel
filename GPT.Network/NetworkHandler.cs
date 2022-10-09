@@ -11,7 +11,7 @@ namespace GPT.Network
 {
     public class NetworkHandler : SimpleChannelInboundHandler<IPacket<IPacketHandler>>, IDisposable
     {
-        private readonly NetworkServer networkServer;
+        internal readonly NetworkServer networkServer;
         private readonly IPacketHandler packetHandler;
 
         private IChannel? channel;
@@ -20,7 +20,7 @@ namespace GPT.Network
         public long LastRecivedPacket
         { get; private set; }
 
-        public NetworkHandler(NetworkServer networkServer, Type packetHandler)
+        public NetworkHandler(NetworkServer networkServer, IChannel channel, Type packetHandler)
         {
             this.networkServer = networkServer;
             this.packetHandler = (IPacketHandler) Activator.CreateInstance(packetHandler, this)!;
@@ -30,12 +30,20 @@ namespace GPT.Network
         {
             base.ChannelActive(context);
             channel = context.Channel;
+            Console.WriteLine($"{channel!.Id} connected");
+
+            SendPacket(new CameraStreamUnfollowPacket()
+            {
+                CameraId = 9999
+            });
         }
 
         public override void ChannelInactive(IChannelHandlerContext context)
         {
             base.ChannelInactive(context);
             Console.WriteLine($"{channel!.Id} lost connection");
+
+            networkServer.networkHandlers.Remove(this);
         }
 
         public override void ChannelReadComplete(IChannelHandlerContext context)
@@ -62,6 +70,11 @@ namespace GPT.Network
             {
                 await channel!.WriteAndFlushAsync(packet);
             }
+        }
+
+        public string GetName()
+        {
+            return channel!.Id.AsShortText() ?? "Unknown";
         }
 
         public async void Dispose()

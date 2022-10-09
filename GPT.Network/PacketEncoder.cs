@@ -16,6 +16,7 @@ namespace GPT.Network
             int packetId = PacketRegistry.GetId(packet);
             ByteBufferUtil.WriteVarInt(output, packetId);
             packet.Write(output);
+            Console.WriteLine("Sended");
         }
     }
 }

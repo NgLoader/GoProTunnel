@@ -8,11 +8,16 @@ namespace GPT.Network
 {
     public class IPacketHandler : IDisposable
     {
-        internal readonly NetworkHandler networkHandler;
+        private readonly NetworkHandler networkHandler;
 
         public IPacketHandler(NetworkHandler networkHandler)
         {
             this.networkHandler = networkHandler;
+        }
+
+        public NetworkHandler GetNetworkHandler()
+        {
+            return this.networkHandler;
         }
 
         public void Dispose()

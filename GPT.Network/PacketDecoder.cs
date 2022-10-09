@@ -13,6 +13,7 @@ namespace GPT.Network
     {
         protected override void Decode(IChannelHandlerContext context, IByteBuffer input, List<object> output)
         {
+            Console.WriteLine("Recieved");
             if (input.ReadableBytes != 0)
             {
                 int packetId = ByteBufferUtil.ReadVarInt(input);
@@ -23,7 +24,7 @@ namespace GPT.Network
                 {
                     throw new IOException($"Packet {packet.GetType().Name} has unreaded bytes");
                 }
-
+                Console.WriteLine("READED");
                 output.Add(packet);
             }
         }
